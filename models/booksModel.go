@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 
 	"github.com/akilans/fiber-book-rest/initializers"
@@ -44,6 +45,36 @@ func AddBook(book Book) (id int, err error) {
 	} else {
 		return book.ID, nil
 	}
+}
+
+// Get book details
+func GetBookByID(id int) Book {
+	book, isExists := IsBookExists(id)
+	if isExists {
+		return book
+	}
+	return Book{}
+}
+
+// check book exits or not
+func IsBookExists(id int) (Book, bool) {
+	var book = Book{ID: id}
+	result := db.Limit(1).Find(&book)
+	if result.RowsAffected > 0 {
+		return book, true
+	}
+	return Book{}, false
+}
+
+// Delete a book by id
+func DeleteBookByID(id int) error {
+	book, isExists := IsBookExists(id)
+	if isExists {
+		db.Delete(&book)
+		return nil
+	}
+	return errors.New("Book doesn't exists")
+
 }
 
 // Migrate tables

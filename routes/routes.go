@@ -15,12 +15,12 @@ func Routes(app *fiber.App) {
 	app.Post("/addbook", controllers.AddBookHandler)
 
 	// get a book by id
-	app.Get("/book/{id}", controllers.GetBookHandler)
+	app.Get("/book/:id", controllers.GetBookHandler)
 
 	// update a book by id
-	app.Put("/book/{id}", controllers.UpdateBookHandler)
+	app.Put("/book/:id", controllers.UpdateBookHandler)
 
 	// delete a book by id
-	app.Delete("/book/{id}", controllers.DeleteBookHandler)
+	app.Delete("/book/:id", controllers.DeleteBookHandler)
 
 }

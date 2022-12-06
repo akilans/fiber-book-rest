@@ -44,7 +44,7 @@ func AddBookHandler(c *fiber.Ctx) error {
 			c.JSON(errMsg)
 			return c.SendStatus(500)
 		} else {
-			successMsg := Message{"Success", "New book added successfully " + strconv.Itoa(newBookID)}
+			successMsg := Message{"Success", "New book added successfully with id - " + strconv.Itoa(newBookID)}
 			c.JSON(successMsg)
 			return c.SendStatus(200)
 		}
@@ -53,7 +53,25 @@ func AddBookHandler(c *fiber.Ctx) error {
 
 // Get book by id function
 func GetBookHandler(c *fiber.Ctx) error {
-	return c.SendString("Hello, World!")
+	bookId, err := c.ParamsInt("id")
+	if err != nil {
+		helpers.LogError(err)
+		errMsg := Message{"Bad Request", "Provide valid book id"}
+		c.JSON(errMsg)
+		return c.SendStatus(400)
+	}
+
+	book := models.GetBookByID(bookId)
+
+	if (book == models.Book{}) {
+		errMsg := Message{"Not Found", "Book doesn't exists"}
+		c.JSON(errMsg)
+		return c.SendStatus(404)
+	} else {
+		c.JSON(book)
+		return c.SendStatus(200)
+	}
+
 }
 
 // Update a book by id function
@@ -63,5 +81,23 @@ func UpdateBookHandler(c *fiber.Ctx) error {
 
 // List books function
 func DeleteBookHandler(c *fiber.Ctx) error {
-	return c.SendString("Hello, World!")
+	bookId, err := c.ParamsInt("id")
+	if err != nil {
+		helpers.LogError(err)
+		errMsg := Message{"Bad Request", "Provide valid book id"}
+		c.JSON(errMsg)
+		return c.SendStatus(400)
+	}
+
+	err = models.DeleteBookByID(bookId)
+	if err != nil {
+		helpers.LogError(err)
+		errMsg := Message{"Not Found", "Book doesn't exists"}
+		c.JSON(errMsg)
+		return c.SendStatus(404)
+	} else {
+		successMsg := Message{"Success", "Book deleted successfully "}
+		c.JSON(successMsg)
+		return c.SendStatus(200)
+	}
 }
