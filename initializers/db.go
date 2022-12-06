@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/akilans/fiber-book-rest/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -22,9 +21,10 @@ func ConnectDB() {
 	} else {
 		log.Println("Connected to DB successfully")
 	}
+
 }
 
-// Migrate tables
-func SyncDB() {
-	DB.AutoMigrate(&models.Book{})
+// Get DB connection
+func GetDB() *gorm.DB {
+	return DB
 }

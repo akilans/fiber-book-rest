@@ -5,16 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/akilans/fiber-book-rest/initializers"
+	"github.com/akilans/fiber-book-rest/routes"
 	"github.com/gofiber/fiber/v2"
 )
-
-// Inital function to load env and connect to DB
-func init() {
-	initializers.LoadEnvs()
-	initializers.ConnectDB()
-	initializers.SyncDB()
-}
 
 // Main function
 func main() {
@@ -24,7 +17,7 @@ func main() {
 	app := fiber.New()
 
 	// router config
-	Routes(app)
+	routes.Routes(app)
 
 	PORT := os.Getenv("PORT")
 	log.Println("Server started on port - ", PORT)

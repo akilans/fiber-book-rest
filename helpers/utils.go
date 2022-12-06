@@ -1,7 +1,10 @@
 package helpers
 
-import "fmt"
+import (
+	"log"
+)
 
-func TotalPrice() {
-	fmt.Println("Some helper functions comes here")
+// Log erros
+func LogError(err error) {
+	log.Printf("Error - %v \n", err.Error())
 }
