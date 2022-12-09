@@ -23,4 +23,7 @@ func Routes(app *fiber.App) {
 	// delete a book by id
 	app.Delete("/book/:id", controllers.DeleteBookHandler)
 
+	// Register Admin page
+	app.Post("/admin", controllers.AddUserHandler)
+
 }

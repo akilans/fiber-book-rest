@@ -47,6 +47,16 @@ func AddBook(book Book) (id int, err error) {
 	}
 }
 
+// Update a book
+func UpdateBook(book Book) (id int, err error) {
+	result := db.Save(&book)
+	if result.Error != nil {
+		return 0, result.Error
+	} else {
+		return book.ID, nil
+	}
+}
+
 // Get book details
 func GetBookByID(id int) Book {
 	book, isExists := IsBookExists(id)
@@ -80,7 +90,7 @@ func DeleteBookByID(id int) error {
 // Migrate tables
 func SyncDB() {
 	log.Println("Start of DB migration")
-	err := db.AutoMigrate(&Book{})
+	err := db.AutoMigrate(&Book{}, &User{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -76,7 +76,42 @@ func GetBookHandler(c *fiber.Ctx) error {
 
 // Update a book by id function
 func UpdateBookHandler(c *fiber.Ctx) error {
-	return c.SendString("Hello, World!")
+
+	bookId, err := c.ParamsInt("id")
+
+	if err != nil {
+		helpers.LogError(err)
+		errMsg := Message{"Bad Request", "Provide valid book id"}
+		c.JSON(errMsg)
+		return c.SendStatus(400)
+	}
+
+	book := models.GetBookByID(bookId)
+
+	if (book == models.Book{}) {
+		errMsg := Message{"Not Found", "Book doesn't exists"}
+		c.JSON(errMsg)
+		return c.SendStatus(404)
+	}
+
+	if err := c.BodyParser(&book); err != nil {
+		helpers.LogError(err)
+		errMsg := Message{"Bad Request", "Failed to update a new book"}
+		c.JSON(errMsg)
+		return c.SendStatus(400)
+	} else {
+		updatedBookID, err := models.UpdateBook(book)
+		if err != nil {
+			helpers.LogError(err)
+			errMsg := Message{"Server Error", "Failed to update a new book"}
+			c.JSON(errMsg)
+			return c.SendStatus(500)
+		} else {
+			successMsg := Message{"Success", "Book updated successfully with id - " + strconv.Itoa(updatedBookID)}
+			c.JSON(successMsg)
+			return c.SendStatus(200)
+		}
+	}
 }
 
 // List books function
