@@ -17,3 +17,14 @@ func AddUser(user User) (id int, err error) {
 		return user.ID, nil
 	}
 }
+
+// add user
+func GetUserByEmail(email string) (User, error) {
+	var user User
+	result := db.Where("email = ?", email).Find(&user)
+	if result.Error != nil {
+		return User{}, result.Error
+	} else {
+		return user, nil
+	}
+}

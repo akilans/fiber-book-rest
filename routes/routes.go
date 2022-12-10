@@ -26,4 +26,7 @@ func Routes(app *fiber.App) {
 	// Register Admin page
 	app.Post("/admin", controllers.AddUserHandler)
 
+	// Login admin
+	app.Post("/login", controllers.LoginHandler)
+
 }
