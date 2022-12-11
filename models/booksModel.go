@@ -11,10 +11,10 @@ import (
 // Book Type -> Books table
 type Book struct {
 	ID       int     `json:"id"`
-	Title    string  `json:"title"`
-	Author   string  `json:"author"`
-	Price    float64 `json:"price"`
-	ImageURL string  `json:"image_url"`
+	Title    string  `json:"title" validate:"required,min=1,max=100"`
+	Author   string  `json:"author" validate:"required,min=1,max=50"`
+	Price    float64 `json:"price" validate:"required,number"`
+	ImageURL string  `json:"image_url" validate:"required,min=1,max=350"`
 }
 
 var db *gorm.DB

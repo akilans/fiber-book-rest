@@ -8,13 +8,14 @@ import (
 
 	"github.com/akilans/fiber-book-rest/helpers"
 	"github.com/akilans/fiber-book-rest/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 type Login struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email,min=6,max=100"`
+	Password string `json:"password" validate:"required,min=6,max=15"`
 }
 
 // Custom claims needed for generating JWT token
@@ -22,6 +23,37 @@ type MyCustomClaims struct {
 	UserEmail    string
 	LoggedInTime string
 	jwt.RegisteredClaims
+}
+
+// validate user payload
+func ValidateUserStruct(user models.User) []ErrorResponse {
+	var errors []ErrorResponse
+	err := validate.Struct(user)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, element)
+		}
+	}
+	return errors
+}
+
+func ValidateLoginUserStruct(user Login) []ErrorResponse {
+	var errors []ErrorResponse
+	err := validate.Struct(user)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, element)
+		}
+	}
+	return errors
 }
 
 // Add User Handler
@@ -35,6 +67,10 @@ func AddUserHandler(c *fiber.Ctx) error {
 		c.JSON(errMsg)
 		return c.SendStatus(400)
 	} else {
+		errors := ValidateUserStruct(loginUser)
+		if errors != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(errors)
+		}
 		hashedPassword, err := helpers.GenerateHashPassword(loginUser.Password)
 
 		if err != nil {
@@ -67,6 +103,10 @@ func LoginHandler(c *fiber.Ctx) error {
 		c.JSON(errMsg)
 		return c.SendStatus(400)
 	} else {
+		errors := ValidateLoginUserStruct(loginUser)
+		if errors != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(errors)
+		}
 		user, err := models.GetUserByEmail(loginUser.Email)
 		if err != nil {
 			helpers.LogError(err)

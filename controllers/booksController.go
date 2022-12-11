@@ -5,12 +5,39 @@ import (
 
 	"github.com/akilans/fiber-book-rest/helpers"
 	"github.com/akilans/fiber-book-rest/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Message struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
+}
+
+// Payload validation response message
+type ErrorResponse struct {
+	FailedField string `json:"failed_field"`
+	Tag         string `json:"tag"`
+	Value       string `json:"value"`
+}
+
+var validate = validator.New()
+
+// validate book payload
+
+func ValidateBookStruct(book models.Book) []ErrorResponse {
+	var errors []ErrorResponse
+	err := validate.Struct(book)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, element)
+		}
+	}
+	return errors
 }
 
 // List books function
@@ -37,6 +64,11 @@ func AddBookHandler(c *fiber.Ctx) error {
 		c.JSON(errMsg)
 		return c.SendStatus(400)
 	} else {
+
+		errors := ValidateBookStruct(newBook)
+		if errors != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(errors)
+		}
 		newBookID, err := models.AddBook(newBook)
 		if err != nil {
 			helpers.LogError(err)
