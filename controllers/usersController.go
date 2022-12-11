@@ -2,16 +2,26 @@ package controllers
 
 import (
 	"log"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/akilans/fiber-book-rest/helpers"
 	"github.com/akilans/fiber-book-rest/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type Login struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// Custom claims needed for generating JWT token
+type MyCustomClaims struct {
+	UserEmail    string
+	LoggedInTime string
+	jwt.RegisteredClaims
 }
 
 // Add User Handler
@@ -70,7 +80,8 @@ func LoginHandler(c *fiber.Ctx) error {
 			}
 			result := helpers.CheckHashPassword(loginUser.Password, user.Password)
 			if result {
-				successMsg := Message{"Success", "Login successful"}
+				token, _ := CreateJWT(loginUser.Email)
+				successMsg := Message{"Success", token}
 				return c.JSON(successMsg)
 			} else {
 				errMsg := Message{"Login Failed", "Invalid password"}
@@ -78,4 +89,28 @@ func LoginHandler(c *fiber.Ctx) error {
 			}
 		}
 	}
+}
+
+// Create JWT token
+// Function to create JWT token
+func CreateJWT(userEmail string) (string, error) {
+	currentTime := time.Now().Format("02-01-2006 15:04:05")
+
+	// Storing user name and loggedin time
+	// Token expires in 1 hour.
+	claims := MyCustomClaims{
+		userEmail,
+		currentTime,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(60 * time.Minute)),
+			Issuer:    "Akilan",
+		},
+	}
+
+	// Generate token with HS256 algorithm and custom claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Sign the token with our secret key
+	signedToken, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+
+	return signedToken, err
 }
