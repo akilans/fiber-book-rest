@@ -4,7 +4,7 @@ package models
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name" validate:"required,min=1,max=100"`
-	Email    string `json:"email" validate:"required,email,min=6,max=100"`
+	Email    string `json:"email" validate:"required,email,min=6,max=100" gorm:"unique"`
 	Password string `json:"password" validate:"required,min=6,max=15"`
 }
 
